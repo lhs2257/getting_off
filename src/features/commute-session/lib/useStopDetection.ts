@@ -14,6 +14,7 @@ import {
   notifyExitStop,
   notifyTransfer,
 } from '../../../services/notification/commuteAlert';
+import { buildTransferInfoList, getTransferForSubPath } from '../../transfer-guide/lib/buildTransferInfo';
 
 export type StopStatus = 'far' | 'approaching' | 'arrived';
 
@@ -124,8 +125,15 @@ export function useStopDetection(
 
         notifyExitStop(currentStation.stationName);
 
-        // 다음 구간이 있으면 환승 안내
-        if (nextSubPath && nextSubPath.trafficType !== 3) {
+        // 다음 구간이 있으면 환승 안내 (도보 시간 포함)
+        const transfers = buildTransferInfoList(route?.path.subPath ?? []);
+        const transferInfo = getTransferForSubPath(transfers, currentSubPathIndex);
+        if (transferInfo) {
+          notifyTransfer(
+            currentStation.stationName,
+            `${transferInfo.nextLaneName} (도보 ${transferInfo.walkingTimeFormatted})`,
+          );
+        } else if (nextSubPath && nextSubPath.trafficType !== 3) {
           const nextLane = nextSubPath.lane?.[0]?.name ?? nextSubPath.lane?.[0]?.busNo ?? '다음 노선';
           notifyTransfer(currentStation.stationName, nextLane);
         }

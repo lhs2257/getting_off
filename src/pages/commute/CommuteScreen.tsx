@@ -7,6 +7,8 @@ import { useStopDetection } from '../../features/commute-session/lib/useStopDete
 import { useRealtimeArrival } from '../../features/realtime-position/lib/useRealtimeArrival';
 import RealtimeArrivalCard from '../../features/realtime-position/ui/RealtimeArrivalCard';
 import CommuteMap from '../../widgets/live-map/CommuteMap';
+import { buildTransferInfoList, getTransferForSubPath } from '../../features/transfer-guide/lib/buildTransferInfo';
+import TransferBanner from '../../features/transfer-guide/ui/TransferBanner';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Commute'>;
 
@@ -30,6 +32,8 @@ export default function CommuteScreen({ navigation }: Props) {
   const { currentStopName, stopStatus, remainingStops, distanceToNext } =
     useStopDetection(location, currentSubPath);
   const { arrivals } = useRealtimeArrival(currentSubPath, status === 'active');
+  const transferInfoList = route ? buildTransferInfoList(route.path.subPath) : [];
+  const currentTransfer = getTransferForSubPath(transferInfoList, currentSubPathIndex);
 
   if (!route || status === 'idle') {
     navigation.goBack();
@@ -117,6 +121,13 @@ export default function CommuteScreen({ navigation }: Props) {
         <RealtimeArrivalCard
           arrivals={arrivals}
           stationName={currentSubPath.startName}
+        />
+      )}
+
+      {currentTransfer && (
+        <TransferBanner
+          transfer={currentTransfer}
+          remainingStops={remainingStops}
         />
       )}
 
