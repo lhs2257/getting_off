@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../app/navigation';
 import { useCommuteStore } from '../../features/commute-session/model/useCommuteStore';
 import { useLocationTracking } from '../../shared/hooks/useLocationTracking';
+import { useStopDetection } from '../../features/commute-session/lib/useStopDetection';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Commute'>;
 
@@ -19,8 +20,12 @@ const TRAFFIC_TYPE_COLORS: Record<number, string> = {
 };
 
 export default function CommuteScreen({ navigation }: Props) {
-  const { status, route, currentSubPathIndex, stopSession } = useCommuteStore();
+  const { status, route, currentSubPathIndex, stopSession, getCurrentSubPath } =
+    useCommuteStore();
   const { location, error: locationError } = useLocationTracking(status === 'active');
+  const currentSubPath = getCurrentSubPath();
+  const { currentStopName, stopStatus, remainingStops, distanceToNext } =
+    useStopDetection(location, currentSubPath);
 
   if (!route || status === 'idle') {
     navigation.goBack();
@@ -76,6 +81,33 @@ export default function CommuteScreen({ navigation }: Props) {
           </Text>
         </View>
       </View>
+
+      {currentStopName && (
+        <View style={[
+          styles.stopBanner,
+          stopStatus === 'arrived' && styles.stopBannerArrived,
+          stopStatus === 'approaching' && styles.stopBannerApproaching,
+        ]}>
+          <Text style={styles.stopBannerLabel}>
+            {stopStatus === 'arrived' ? '현재 정거장' : '접근 중'}
+          </Text>
+          <Text style={styles.stopBannerName}>{currentStopName}</Text>
+          <View style={styles.stopBannerInfo}>
+            {remainingStops > 0 && (
+              <Text style={styles.stopBannerDetail}>
+                {remainingStops}정거장 남음
+              </Text>
+            )}
+            {distanceToNext !== null && (
+              <Text style={styles.stopBannerDetail}>
+                {distanceToNext < 1000
+                  ? `${Math.round(distanceToNext)}m`
+                  : `${(distanceToNext / 1000).toFixed(1)}km`}
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
 
       <ScrollView style={styles.timeline} contentContainerStyle={styles.timelineContent}>
         {subPath.map((sp, index) => {
@@ -192,6 +224,43 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 12,
     color: 'rgba(255,255,255,0.7)',
+  },
+  stopBanner: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: '#F5F5F5',
+    borderLeftWidth: 4,
+    borderLeftColor: '#999',
+  },
+  stopBannerApproaching: {
+    backgroundColor: '#FFF8E1',
+    borderLeftColor: '#FFB300',
+  },
+  stopBannerArrived: {
+    backgroundColor: '#E8F5E9',
+    borderLeftColor: '#4CAF50',
+  },
+  stopBannerLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#888',
+    marginBottom: 2,
+  },
+  stopBannerName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  stopBannerInfo: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+  },
+  stopBannerDetail: {
+    fontSize: 13,
+    color: '#666',
   },
   timeline: {
     flex: 1,
