@@ -8,7 +8,7 @@
 ## [프로젝트] 기본 정보
 
 - **프로젝트명**: Getting Off (직장인 출퇴근 교통 알림 앱)
-- **기술 스택**: React Native + Expo SDK 57 + TypeScript
+- **기술 스택**: React Native + Expo SDK 52 + TypeScript
 - **아키텍처**: FSD(Feature-Sliced Design) + Clean Architecture
 - **앱 소스 경로**: `src/` (Expo 프로젝트 루트)
 - **리서치 자료**: `research/` 폴더 참조

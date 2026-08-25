@@ -13,7 +13,7 @@
 
 | 분류 | 기술 |
 |------|------|
-| 프레임워크 | React Native + Expo SDK 57 |
+| 프레임워크 | React Native + Expo SDK 52 |
 | 언어 | TypeScript |
 | 상태 관리 | Zustand + React Query |
 | 로컬 DB | expo-sqlite |

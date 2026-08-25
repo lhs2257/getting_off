@@ -8,7 +8,7 @@
 
 | 작업 | 상태 | 비고 |
 |------|------|------|
-| 1.1 Expo 프로젝트 초기화 + TypeScript | [완료] | Expo SDK 57, blank-typescript |
+| 1.1 Expo 프로젝트 초기화 + TypeScript | [완료] | Expo SDK 52, blank-typescript |
 | 1.2 FSD 폴더 구조 생성 | [완료] | core/pages/widgets/features/entities/shared/services (app->core 이름 변경) |
 | 1.3 핵심 라이브러리 설치 | [완료] | Zustand, React Query, Axios, expo-location 등 |
 | 1.4 API 클라이언트 기본 설정 | [완료] | 서울열린데이터, ODsay, Axios 기본 클라이언트 |
@@ -54,7 +54,7 @@
 | 6.1 설정 화면 | [완료] | 보행 속도, 알림 타이밍, 소리/진동 설정 (인메모리, Expo Go 호환) |
 | 6.2 백그라운드 서비스 안정화 | [완료] | 앱 상태 감지, 포그라운드/백그라운드 전환, 에러 핸들링 |
 | 6.3 배터리 최적화 | [완료] | Balanced 정확도, 배치 업데이트, 자동 일시정지 |
-| 6.4 테스트 및 버그 수정 | [진행중] | Expo Go 호환 완료, app->core 이름 변경, 실기기 테스트 대기 |
+| 6.4 테스트 및 버그 수정 | [진행중] | SDK 52 다운그레이드, Expo Go 호환, 실기기 테스트 중 |
 
 ## 추가 예정
 
