@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import RootNavigator from './app/navigation';
+import RootNavigator from './core/navigation';
 import { setupNotifications } from './services/notification/commuteAlert';
 
 export default function App() {

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../app/navigation';
+import type { RootStackParamList } from '../../core/navigation';
 import { useCommuteStore } from '../../features/commute-session/model/useCommuteStore';
 import { useLocationTracking } from '../../shared/hooks/useLocationTracking';
 import { useStopDetection } from '../../features/commute-session/lib/useStopDetection';

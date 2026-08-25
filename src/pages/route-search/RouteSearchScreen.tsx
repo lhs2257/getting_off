@@ -17,7 +17,7 @@ import type { OdsayStation, OdsayPath } from '../../entities/route/model/types';
 import { toRouteStation } from '../../entities/route/model/SavedRoute';
 import { saveRoute } from '../../entities/route/api/routeStorage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../app/navigation';
+import type { RootStackParamList } from '../../core/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'RouteSearch'>;
 

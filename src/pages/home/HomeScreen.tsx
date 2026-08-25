@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../app/navigation';
+import type { RootStackParamList } from '../../core/navigation';
 import type { SavedRoute } from '../../entities/route/model/SavedRoute';
 import { getAllRoutes, deleteRoute } from '../../entities/route/api/routeStorage';
 import SavedRouteCard from '../../widgets/route-card/SavedRouteCard';
