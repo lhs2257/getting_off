@@ -4,6 +4,8 @@ import type { RootStackParamList } from '../../app/navigation';
 import { useCommuteStore } from '../../features/commute-session/model/useCommuteStore';
 import { useLocationTracking } from '../../shared/hooks/useLocationTracking';
 import { useStopDetection } from '../../features/commute-session/lib/useStopDetection';
+import { useRealtimeArrival } from '../../features/realtime-position/lib/useRealtimeArrival';
+import RealtimeArrivalCard from '../../features/realtime-position/ui/RealtimeArrivalCard';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Commute'>;
 
@@ -26,6 +28,7 @@ export default function CommuteScreen({ navigation }: Props) {
   const currentSubPath = getCurrentSubPath();
   const { currentStopName, stopStatus, remainingStops, distanceToNext } =
     useStopDetection(location, currentSubPath);
+  const { arrivals } = useRealtimeArrival(currentSubPath, status === 'active');
 
   if (!route || status === 'idle') {
     navigation.goBack();
@@ -107,6 +110,13 @@ export default function CommuteScreen({ navigation }: Props) {
             )}
           </View>
         </View>
+      )}
+
+      {arrivals.length > 0 && currentSubPath && (
+        <RealtimeArrivalCard
+          arrivals={arrivals}
+          stationName={currentSubPath.startName}
+        />
       )}
 
       <ScrollView style={styles.timeline} contentContainerStyle={styles.timelineContent}>
