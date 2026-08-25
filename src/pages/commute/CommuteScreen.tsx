@@ -6,6 +6,7 @@ import { useLocationTracking } from '../../shared/hooks/useLocationTracking';
 import { useStopDetection } from '../../features/commute-session/lib/useStopDetection';
 import { useRealtimeArrival } from '../../features/realtime-position/lib/useRealtimeArrival';
 import RealtimeArrivalCard from '../../features/realtime-position/ui/RealtimeArrivalCard';
+import CommuteMap from '../../widgets/live-map/CommuteMap';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Commute'>;
 
@@ -118,6 +119,12 @@ export default function CommuteScreen({ navigation }: Props) {
           stationName={currentSubPath.startName}
         />
       )}
+
+      <CommuteMap
+        location={location}
+        subPaths={subPath}
+        currentSubPathIndex={currentSubPathIndex}
+      />
 
       <ScrollView style={styles.timeline} contentContainerStyle={styles.timelineContent}>
         {subPath.map((sp, index) => {
