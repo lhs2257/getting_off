@@ -8,8 +8,8 @@
 
 | 작업 | 상태 | 비고 |
 |------|------|------|
-| 1.1 Expo 프로젝트 초기화 + TypeScript | [완료] | Expo SDK 53, blank-typescript |
-| 1.2 FSD 폴더 구조 생성 | [완료] | app/pages/widgets/features/entities/shared/services |
+| 1.1 Expo 프로젝트 초기화 + TypeScript | [완료] | Expo SDK 57, blank-typescript |
+| 1.2 FSD 폴더 구조 생성 | [완료] | app/pages/widgets/features/entities/shared/services (.gitkeep 포함) |
 | 1.3 핵심 라이브러리 설치 | [완료] | Zustand, React Query, Axios, expo-location 등 |
 | 1.4 API 클라이언트 기본 설정 | [대기] | 서울열린데이터, ODsay |
 
