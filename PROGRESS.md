@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-- 프로젝트 초기화 진행 중 (4/5단계)
+- Phase 1 기반 세팅 완료
 
 ## Phase 1: 기반 세팅
 
@@ -11,7 +11,7 @@
 | 1.1 Expo 프로젝트 초기화 + TypeScript | [완료] | Expo SDK 57, blank-typescript |
 | 1.2 FSD 폴더 구조 생성 | [완료] | app/pages/widgets/features/entities/shared/services (.gitkeep 포함) |
 | 1.3 핵심 라이브러리 설치 | [완료] | Zustand, React Query, Axios, expo-location 등 |
-| 1.4 API 클라이언트 기본 설정 | [대기] | 서울열린데이터, ODsay |
+| 1.4 API 클라이언트 기본 설정 | [완료] | 서울열린데이터, ODsay, Axios 기본 클라이언트 |
 
 ## Phase 2: 경로 설정
 
@@ -64,4 +64,4 @@
 
 ## 다음 작업
 
-Phase 1.4: API 클라이언트 기본 설정 (서울열린데이터, ODsay)
+Phase 2.1: 경로 탐색 UI (출발/도착 입력)
