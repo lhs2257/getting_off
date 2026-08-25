@@ -8,6 +8,12 @@ import {
   STOP_APPROACHING_RADIUS,
 } from '../../../shared/lib/geofence';
 import { useCommuteStore } from '../model/useCommuteStore';
+import {
+  notifyApproaching,
+  notifyArrived,
+  notifyExitStop,
+  notifyTransfer,
+} from '../../../services/notification/commuteAlert';
 
 export type StopStatus = 'far' | 'approaching' | 'arrived';
 
@@ -31,6 +37,7 @@ export function useStopDetection(
   const { setCurrentStopIndex, advanceSubPath, route, currentSubPathIndex } =
     useCommuteStore();
   const lastDetectedIndex = useRef(-1);
+  const lastNotifiedStatus = useRef<StopStatus>('far');
 
   const defaultResult: StopDetectionResult = {
     currentStopName: null,
@@ -110,13 +117,35 @@ export function useStopDetection(
       lastDetectedIndex.current = index;
       setCurrentStopIndex(index);
 
-      // 마지막 정거장(하차역) 도착 → 다음 구간으로 이동
+      // 마지막 정거장(하차역) 도착
       if (index >= lastStationIndex) {
         const totalSubPaths = route?.path.subPath.length ?? 0;
+        const nextSubPath = route?.path.subPath[currentSubPathIndex + 1];
+
+        notifyExitStop(currentStation.stationName);
+
+        // 다음 구간이 있으면 환승 안내
+        if (nextSubPath && nextSubPath.trafficType !== 3) {
+          const nextLane = nextSubPath.lane?.[0]?.name ?? nextSubPath.lane?.[0]?.busNo ?? '다음 노선';
+          notifyTransfer(currentStation.stationName, nextLane);
+        }
+
         if (currentSubPathIndex < totalSubPaths - 1) {
           advanceSubPath();
         }
+      } else {
+        notifyArrived(currentStation.stationName);
       }
+    } else if (
+      distance < STOP_APPROACHING_RADIUS &&
+      distance >= STOP_ARRIVAL_RADIUS &&
+      lastNotifiedStatus.current === 'far' &&
+      remaining <= 2 &&
+      remaining > 0
+    ) {
+      // 하차역 2정거장 전 접근 알림 (1회)
+      lastNotifiedStatus.current = 'approaching';
+      notifyApproaching(currentStation.stationName, remaining);
     }
 
     let stopStatus: StopStatus = 'far';
@@ -136,9 +165,10 @@ export function useStopDetection(
 
   const result = detectStop();
 
-  // 구간이 바뀌면 감지 인덱스 리셋
+  // 구간이 바뀌면 감지 상태 리셋
   useEffect(() => {
     lastDetectedIndex.current = -1;
+    lastNotifiedStatus.current = 'far';
   }, [currentSubPathIndex]);
 
   return result;
