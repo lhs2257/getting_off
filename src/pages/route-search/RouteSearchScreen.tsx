@@ -14,8 +14,14 @@ import StationSearchInput from '../../features/route-search/ui/StationSearchInpu
 import RouteResultItem from '../../features/route-search/ui/RouteResultItem';
 import { searchRoute } from '../../features/route-search/api';
 import type { OdsayStation, OdsayPath } from '../../entities/route/model/types';
+import { toRouteStation } from '../../entities/route/model/SavedRoute';
+import { saveRoute } from '../../entities/route/api/routeStorage';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../app/navigation';
 
-export default function RouteSearchScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'RouteSearch'>;
+
+export default function RouteSearchScreen({ navigation }: Props) {
   const [departureStation, setDepartureStation] = useState<OdsayStation | null>(null);
   const [arrivalStation, setArrivalStation] = useState<OdsayStation | null>(null);
   const [routes, setRoutes] = useState<OdsayPath[]>([]);
@@ -54,10 +60,34 @@ export default function RouteSearchScreen() {
   };
 
   const handleRoutePress = (path: OdsayPath) => {
-    // Phase 2.3에서 경로 저장 기능 연동 예정
+    if (!departureStation || !arrivalStation) return;
+
+    const routeName = `${departureStation.stationName} → ${arrivalStation.stationName}`;
+
     Alert.alert(
-      '경로 선택',
-      `${path.info.firstStartStation} → ${path.info.lastEndStation}\n소요시간: ${path.info.totalTime}분 | 요금: ${path.info.payment.toLocaleString()}원\n\n경로 저장 기능은 다음 단계에서 구현됩니다.`,
+      '경로 저장',
+      `${path.info.firstStartStation} → ${path.info.lastEndStation}\n소요시간: ${path.info.totalTime}분 | 요금: ${path.info.payment.toLocaleString()}원\n\n이 경로를 저장하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '저장',
+          onPress: async () => {
+            try {
+              await saveRoute(
+                routeName,
+                toRouteStation(departureStation),
+                toRouteStation(arrivalStation),
+                path,
+              );
+              Alert.alert('저장 완료', '경로가 저장되었습니다.', [
+                { text: '확인', onPress: () => navigation.goBack() },
+              ]);
+            } catch {
+              Alert.alert('오류', '경로 저장에 실패했습니다.');
+            }
+          },
+        },
+      ],
     );
   };
 
