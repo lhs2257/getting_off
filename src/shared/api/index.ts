@@ -1,3 +1,3 @@
 export { createApiClient } from './client';
 export { seoulApi, fetchSeoulApi } from './seoulApi';
-export { odsayApi, fetchOdsayApi } from './odsayApi';
+export { kakaoLocalApi, kakaoMobilityApi, fetchKakaoLocal, fetchKakaoMobility } from './kakaoApi';
