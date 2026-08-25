@@ -13,6 +13,7 @@ import type { RootStackParamList } from '../../app/navigation';
 import type { SavedRoute } from '../../entities/route/model/SavedRoute';
 import { getAllRoutes, deleteRoute } from '../../entities/route/api/routeStorage';
 import SavedRouteCard from '../../widgets/route-card/SavedRouteCard';
+import { useCommuteStore } from '../../features/commute-session/model/useCommuteStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -34,8 +35,23 @@ export default function HomeScreen({ navigation }: Props) {
     }
   };
 
-  const handleRoutePress = (_route: SavedRoute) => {
-    // Phase 3에서 출퇴근 세션 시작 기능 연동 예정
+  const startSession = useCommuteStore((s) => s.startSession);
+
+  const handleRoutePress = (route: SavedRoute) => {
+    Alert.alert(
+      '출퇴근 시작',
+      `"${route.name}" 경로로 출퇴근을 시작하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '시작',
+          onPress: () => {
+            startSession(route);
+            navigation.navigate('Commute');
+          },
+        },
+      ],
+    );
   };
 
   const handleDeleteRoute = (route: SavedRoute) => {
