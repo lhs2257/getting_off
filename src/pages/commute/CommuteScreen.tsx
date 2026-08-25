@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView } from 'rea
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../app/navigation';
 import { useCommuteStore } from '../../features/commute-session/model/useCommuteStore';
+import { useLocationTracking } from '../../shared/hooks/useLocationTracking';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Commute'>;
 
@@ -19,6 +20,7 @@ const TRAFFIC_TYPE_COLORS: Record<number, string> = {
 
 export default function CommuteScreen({ navigation }: Props) {
   const { status, route, currentSubPathIndex, stopSession } = useCommuteStore();
+  const { location, error: locationError } = useLocationTracking(status === 'active');
 
   if (!route || status === 'idle') {
     navigation.goBack();
@@ -61,6 +63,16 @@ export default function CommuteScreen({ navigation }: Props) {
           <Text style={styles.summaryDivider}>|</Text>
           <Text style={styles.summaryText}>
             환승 {path.info.busTransitCount + path.info.subwayTransitCount}회
+          </Text>
+        </View>
+        <View style={styles.locationRow}>
+          <View style={[styles.locationDot, { backgroundColor: location ? '#4CAF50' : '#FF9800' }]} />
+          <Text style={styles.locationText}>
+            {locationError
+              ? locationError
+              : location
+                ? `위치 추적 중 (정확도: ${Math.round(location.accuracy ?? 0)}m)`
+                : '위치 정보 대기 중...'}
           </Text>
         </View>
       </View>
@@ -165,6 +177,21 @@ const styles = StyleSheet.create({
   summaryDivider: {
     color: 'rgba(255,255,255,0.4)',
     marginHorizontal: 8,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 6,
+  },
+  locationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  locationText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
   },
   timeline: {
     flex: 1,
