@@ -1,13 +1,16 @@
+import { TouchableOpacity, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../pages/home/HomeScreen';
 import RouteSearchScreen from '../pages/route-search/RouteSearchScreen';
 import CommuteScreen from '../pages/commute/CommuteScreen';
+import SettingsScreen from '../pages/settings/SettingsScreen';
 
 export type RootStackParamList = {
   Home: undefined;
   RouteSearch: undefined;
   Commute: undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -26,7 +29,14 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: 'Getting Off' }}
+          options={({ navigation }) => ({
+            title: 'Getting Off',
+            headerRight: () => (
+              <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+                <Text style={{ color: '#fff', fontSize: 14 }}>설정</Text>
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="RouteSearch"
@@ -41,6 +51,11 @@ export default function RootNavigator() {
             headerBackVisible: false,
             gestureEnabled: false,
           }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: '설정' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

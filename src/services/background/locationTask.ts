@@ -1,11 +1,11 @@
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
+import { AppState } from 'react-native';
 
 export const LOCATION_TASK_NAME = 'background-location-task';
 
 /**
  * 위치 업데이트 콜백 등록용 리스너
- * CommuteScreen 등에서 구독하여 위치 변화를 처리합니다.
  */
 type LocationListener = (locations: Location.LocationObject[]) => void;
 
@@ -17,7 +17,6 @@ export function setLocationListener(fn: LocationListener | null) {
 
 /**
  * 백그라운드 위치 추적 태스크 정의
- * 앱이 백그라운드에 있어도 위치 업데이트를 수신합니다.
  */
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (error) {
@@ -33,6 +32,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
 /**
  * 백그라운드 위치 추적 시작
+ *
+ * 배터리 최적화:
+ * - 백그라운드: Balanced 정확도, 10초/50m 간격
+ * - 포그라운드: High 정확도는 useLocationTracking에서 별도 처리
+ * - deferredUpdatesInterval로 배치 업데이트
+ * - pausesUpdatesAutomatically로 정지 시 자동 일시정지 (iOS)
  */
 export async function startLocationTracking(): Promise<boolean> {
   const { status: fgStatus } = await Location.requestForegroundPermissionsAsync();
@@ -45,10 +50,13 @@ export async function startLocationTracking(): Promise<boolean> {
   if (isStarted) return true;
 
   await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-    accuracy: Location.Accuracy.High,
-    timeInterval: 5000,
-    distanceInterval: 20,
+    accuracy: Location.Accuracy.Balanced,
+    timeInterval: 10_000,
+    distanceInterval: 50,
+    deferredUpdatesInterval: 10_000,
     showsBackgroundLocationIndicator: true,
+    pausesUpdatesAutomatically: true,
+    activityType: Location.ActivityType.OtherNavigation,
     foregroundService: {
       notificationTitle: 'Getting Off',
       notificationBody: '출퇴근 위치를 추적 중입니다',
@@ -63,9 +71,20 @@ export async function startLocationTracking(): Promise<boolean> {
  * 백그라운드 위치 추적 중지
  */
 export async function stopLocationTracking(): Promise<void> {
-  const isStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
-  if (isStarted) {
-    await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+  try {
+    const isStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+    if (isStarted) {
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+    }
+  } catch {
+    // 이미 중지된 경우 무시
   }
   listener = null;
+}
+
+/**
+ * 현재 앱이 포그라운드인지 확인
+ */
+export function isAppInForeground(): boolean {
+  return AppState.currentState === 'active';
 }
