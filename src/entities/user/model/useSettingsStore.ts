@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { createMMKV } from 'react-native-mmkv';
 
-const storage = createMMKV({ id: 'settings' });
+// TODO: 네이티브 빌드 시 react-native-mmkv로 교체하여 영속화
+// Expo Go 호환을 위해 인메모리 스토어 사용 (앱 재시작 시 초기화됨)
 
 interface SettingsState {
   /** 보행 속도 (m/s) */
@@ -19,36 +19,14 @@ interface SettingsState {
   setVibrationEnabled: (enabled: boolean) => void;
 }
 
-function loadNumber(key: string, fallback: number): number {
-  const val = storage.getNumber(key);
-  return val !== undefined ? val : fallback;
-}
-
-function loadBoolean(key: string, fallback: boolean): boolean {
-  const val = storage.getBoolean(key);
-  return val !== undefined ? val : fallback;
-}
-
 export const useSettingsStore = create<SettingsState>((set) => ({
-  walkingSpeed: loadNumber('walkingSpeed', 1.2),
-  alertStopsBefore: loadNumber('alertStopsBefore', 2),
-  soundEnabled: loadBoolean('soundEnabled', true),
-  vibrationEnabled: loadBoolean('vibrationEnabled', true),
+  walkingSpeed: 1.2,
+  alertStopsBefore: 2,
+  soundEnabled: true,
+  vibrationEnabled: true,
 
-  setWalkingSpeed: (speed) => {
-    storage.set('walkingSpeed', speed);
-    set({ walkingSpeed: speed });
-  },
-  setAlertStopsBefore: (count) => {
-    storage.set('alertStopsBefore', count);
-    set({ alertStopsBefore: count });
-  },
-  setSoundEnabled: (enabled) => {
-    storage.set('soundEnabled', enabled);
-    set({ soundEnabled: enabled });
-  },
-  setVibrationEnabled: (enabled) => {
-    storage.set('vibrationEnabled', enabled);
-    set({ vibrationEnabled: enabled });
-  },
+  setWalkingSpeed: (speed) => set({ walkingSpeed: speed }),
+  setAlertStopsBefore: (count) => set({ alertStopsBefore: count }),
+  setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
+  setVibrationEnabled: (enabled) => set({ vibrationEnabled: enabled }),
 }));

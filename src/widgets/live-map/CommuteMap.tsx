@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import type { LocationState } from '../../shared/hooks/useLocationTracking';
 import type { OdsaySubPath } from '../../entities/route/model/types';
+
+// TODO: 네이티브 빌드 시 react-native-maps로 교체
+// Expo Go 호환을 위해 텍스트 기반 경로 표시 사용
 
 interface Props {
   location: LocationState | null;
@@ -10,81 +12,20 @@ interface Props {
   currentSubPathIndex: number;
 }
 
+const TRAFFIC_LABELS: Record<number, string> = {
+  1: '[지하철]',
+  2: '[버스]',
+  3: '[도보]',
+};
+
 const TRAFFIC_COLORS: Record<number, string> = {
-  1: '#1A73E8', // 지하철
-  2: '#34A853', // 버스
-  3: '#BDBDBD', // 도보
+  1: '#1A73E8',
+  2: '#34A853',
+  3: '#999',
 };
 
 export default function CommuteMap({ location, subPaths, currentSubPathIndex }: Props) {
   const [expanded, setExpanded] = useState(false);
-
-  // 모든 구간의 정거장 좌표를 수집
-  const allStops = subPaths.flatMap((sp) => {
-    const stops: { latitude: number; longitude: number; name: string; type: number }[] = [];
-
-    // 출발점
-    if (sp.startX && sp.startY) {
-      stops.push({
-        latitude: sp.startY,
-        longitude: sp.startX,
-        name: sp.startName,
-        type: sp.trafficType,
-      });
-    }
-
-    // 경유 정거장
-    if (sp.passStopList?.stations) {
-      for (const st of sp.passStopList.stations) {
-        stops.push({
-          latitude: st.y,
-          longitude: st.x,
-          name: st.stationName,
-          type: sp.trafficType,
-        });
-      }
-    }
-
-    // 도착점
-    if (sp.endX && sp.endY) {
-      stops.push({
-        latitude: sp.endY,
-        longitude: sp.endX,
-        name: sp.endName,
-        type: sp.trafficType,
-      });
-    }
-
-    return stops;
-  });
-
-  // 구간별 경로선 좌표
-  const polylines = subPaths.map((sp, idx) => {
-    const coords: { latitude: number; longitude: number }[] = [];
-
-    if (sp.startX && sp.startY) {
-      coords.push({ latitude: sp.startY, longitude: sp.startX });
-    }
-    if (sp.passStopList?.stations) {
-      for (const st of sp.passStopList.stations) {
-        coords.push({ latitude: st.y, longitude: st.x });
-      }
-    }
-    if (sp.endX && sp.endY) {
-      coords.push({ latitude: sp.endY, longitude: sp.endX });
-    }
-
-    return {
-      coords,
-      color: TRAFFIC_COLORS[sp.trafficType] ?? '#999',
-      isPast: idx < currentSubPathIndex,
-      isActive: idx === currentSubPathIndex,
-    };
-  });
-
-  // 초기 지도 영역 계산
-  const centerLat = location?.latitude ?? (allStops[0]?.latitude ?? 37.5665);
-  const centerLon = location?.longitude ?? (allStops[0]?.longitude ?? 126.978);
 
   return (
     <View style={styles.container}>
@@ -92,58 +33,54 @@ export default function CommuteMap({ location, subPaths, currentSubPathIndex }: 
         style={styles.toggleButton}
         onPress={() => setExpanded(!expanded)}
       >
-        <Text style={styles.toggleText}>{expanded ? '지도 접기' : '지도 보기'}</Text>
+        <Text style={styles.toggleText}>
+          {expanded ? '경로 상세 접기' : '경로 상세 보기'}
+        </Text>
       </TouchableOpacity>
 
       {expanded && (
-        <MapView
-          style={styles.map}
-          provider={PROVIDER_DEFAULT}
-          initialRegion={{
-            latitude: centerLat,
-            longitude: centerLon,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
-          showsUserLocation
-          showsMyLocationButton
-        >
-          {/* 경로선 */}
-          {polylines.map((pl, i) =>
-            pl.coords.length >= 2 ? (
-              <Polyline
-                key={`line-${i}`}
-                coordinates={pl.coords}
-                strokeColor={pl.isPast ? '#E0E0E0' : pl.color}
-                strokeWidth={pl.isActive ? 5 : 3}
-                lineDashPattern={pl.coords.length < 2 ? undefined : undefined}
-              />
-            ) : null,
+        <ScrollView style={styles.detailBox} nestedScrollEnabled>
+          {location && (
+            <Text style={styles.locationInfo}>
+              현재 위치: {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+            </Text>
           )}
 
-          {/* 주요 정거장 마커: 각 구간의 출발/도착만 표시 */}
-          {subPaths.map((sp, idx) => (
-            <Marker
-              key={`start-${idx}`}
-              coordinate={{ latitude: sp.startY, longitude: sp.startX }}
-              title={sp.startName}
-              pinColor={idx <= currentSubPathIndex ? TRAFFIC_COLORS[sp.trafficType] : '#BDBDBD'}
-            />
-          ))}
+          {subPaths.map((sp, idx) => {
+            const isPast = idx < currentSubPathIndex;
+            const isActive = idx === currentSubPathIndex;
+            const color = TRAFFIC_COLORS[sp.trafficType] ?? '#999';
 
-          {/* 최종 도착 마커 */}
-          {subPaths.length > 0 && (
-            <Marker
-              key="end-final"
-              coordinate={{
-                latitude: subPaths[subPaths.length - 1].endY,
-                longitude: subPaths[subPaths.length - 1].endX,
-              }}
-              title={subPaths[subPaths.length - 1].endName}
-              pinColor="#E53935"
-            />
-          )}
-        </MapView>
+            return (
+              <View
+                key={idx}
+                style={[
+                  styles.stopRow,
+                  isPast && styles.stopRowPast,
+                  isActive && styles.stopRowActive,
+                ]}
+              >
+                <View style={[styles.dot, { backgroundColor: color }]} />
+                <View style={styles.stopInfo}>
+                  <Text style={[styles.typeLabel, { color }]}>
+                    {TRAFFIC_LABELS[sp.trafficType] ?? ''}{' '}
+                    {sp.lane?.[0]?.name ?? sp.lane?.[0]?.busNo ?? ''}
+                  </Text>
+                  <Text style={[styles.stopName, isPast && styles.textPast]}>
+                    {sp.startName} → {sp.endName}
+                  </Text>
+                  <Text style={styles.stopMeta}>
+                    {sp.sectionTime}분
+                    {sp.stationCount > 0 ? ` / ${sp.stationCount}정거장` : ''}
+                  </Text>
+                  {isActive && (
+                    <Text style={styles.activeTag}>-- 현재 구간 --</Text>
+                  )}
+                </View>
+              </View>
+            );
+          })}
+        </ScrollView>
       )}
     </View>
   );
@@ -170,10 +107,66 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1A73E8',
   },
-  map: {
-    height: 250,
+  detailBox: {
+    maxHeight: 220,
+    backgroundColor: '#fff',
     borderRadius: 10,
     marginTop: 8,
-    overflow: 'hidden',
+    padding: 12,
+  },
+  locationInfo: {
+    fontSize: 11,
+    color: '#999',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  stopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  stopRowPast: {
+    opacity: 0.4,
+  },
+  stopRowActive: {
+    backgroundColor: '#FFF8E1',
+    borderRadius: 6,
+    marginHorizontal: -4,
+    paddingHorizontal: 4,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 4,
+    marginRight: 10,
+  },
+  stopInfo: {
+    flex: 1,
+  },
+  typeLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  stopName: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 2,
+  },
+  textPast: {
+    color: '#BBB',
+  },
+  stopMeta: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  activeTag: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#F57C00',
+    marginTop: 4,
   },
 });
