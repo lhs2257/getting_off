@@ -7,6 +7,9 @@ import { KAKAO_API_BASE_URL, KAKAO_MOBILITY_BASE_URL, KAKAO_API_KEY } from '../c
 export const kakaoLocalApi = createApiClient(KAKAO_API_BASE_URL);
 
 kakaoLocalApi.interceptors.request.use((config) => {
+  if (__DEV__) {
+    console.log('[Kakao] API Key loaded:', KAKAO_API_KEY ? `${KAKAO_API_KEY.substring(0, 6)}...` : 'EMPTY');
+  }
   config.headers.Authorization = `KakaoAK ${KAKAO_API_KEY}`;
   return config;
 });
