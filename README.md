@@ -1,88 +1,89 @@
-# 범용 클로드코드 프로젝트 템플릿
+# Getting Off
 
-## 개요
+출퇴근 경로를 저장하고 버튼 하나로 하차 알림을 받는 교통 알림 앱입니다.
 
-이 템플릿은 Claude Code로 어떤 프로젝트든 최적으로 시작할 수 있도록 설계된 **meta-template**입니다.
+## 소개
 
-복제 후 Claude Code를 실행하면, 자동으로 온보딩 프로세스가 시작되어:
-1. 프로젝트 목적과 업무 유형을 파악하고
-2. 해당 분야에 맞는 방법론과 구조를 리서치하고
-3. 최적의 폴더 구조와 규칙을 제안/승인 후 세팅합니다
+지하철이나 버스에서 졸거나 스마트폰에 집중하다 내릴 역을 놓친 경험이 있으신가요?
 
-## 사용법
+Getting Off는 출퇴근 경로를 한 번만 저장하면, 매일 "출퇴근 시작" 한 번의 탭으로 정거장 접근 알림, 하차 알림, 환승 안내를 자동으로 받을 수 있는 앱입니다.
 
-### 1. 템플릿 복제
+### 주요 기능
+
+- **경로 저장** - 출발지/도착지 검색 후 대중교통 경로를 저장
+- **하차 알림** - GPS 기반으로 하차역 접근 시 알림
+- **환승 안내** - 환승 지점에서 도보 시간과 다음 노선 정보 제공
+- **실시간 도착정보** - 버스/지하철 실시간 도착 시간 표시
+- **백그라운드 추적** - 앱을 꺼도 위치 추적 및 알림 지속
+
+## 기술 스택
+
+| 분류 | 기술 |
+|------|------|
+| 프레임워크 | React Native + Expo SDK 54 |
+| 언어 | TypeScript |
+| 상태 관리 | Zustand |
+| 로컬 DB | expo-sqlite |
+| 위치 추적 | expo-location + expo-task-manager |
+| 알림 | expo-notifications |
+| API | 카카오 로컬/모빌리티, 서울열린데이터광장 |
+
+## 시작하기
+
+### 사전 요구사항
+
+- Node.js 18+
+- Expo Go 앱 (iOS/Android)
+
+### 설치
+
 ```bash
-cp -r "범용 클로드코드 템플릿" "새-프로젝트명"
-cd "새-프로젝트명"
+git clone https://github.com/lhs2257/getting_off.git
+cd getting_off/src
+npm install
 ```
 
-### 2. Claude Code 실행
+### 환경변수 설정
+
+`src/.env` 파일을 생성하고 API 키를 입력합니다.
+
+```
+EXPO_PUBLIC_SEOUL_API_KEY=서울열린데이터광장_인증키
+EXPO_PUBLIC_KAKAO_API_KEY=카카오_REST_API_키
+```
+
+- 서울열린데이터광장: https://data.seoul.go.kr
+- 카카오 개발자: https://developers.kakao.com
+
+### 실행
+
 ```bash
-claude
-```
-또는 VS Code에서 Claude Code 확장으로 실행
-
-### 3. 자동 온보딩
-Claude Code가 CLAUDE.md를 읽고 자동으로 5단계 온보딩을 시작합니다:
-- 1단계: 프로젝트 파악 (목적, 유형, 기술 스택 질문)
-- 2단계: 맞춤 리서치 (방법론, 구조, 베스트 프랙티스)
-- 3단계: 구조/방법론 제안 (사용자 승인)
-- 4단계: 프로젝트 세팅 (폴더, 문서, 설정)
-- 5단계: 업무 시작 준비 완료
-
-### 4. 커스텀 커맨드 활용
-- `/project:init` - 초기화 재실행
-- `/project:status` - 현황 확인
-- `/project:next` - 다음 작업 진행
-- `/project:review` - 전체 검토
-- `/project:resume` - 이전 세션 복원 (git log + PROGRESS.md 기반)
-
-## 템플릿 구조
-
-```
-범용 클로드코드 템플릿/
-  CLAUDE.md                    # 온보딩 프로세스 및 핵심 원칙 정의
-  README.md                    # 현재 파일 (템플릿 사용 안내)
-  .gitignore                   # Git 제외 파일 목록
-  .claude/
-    settings.json              # Claude Code 설정 (hooks, 권한, 보안)
-    commands/
-      init.md                  # /project:init 커맨드
-      status.md                # /project:status 커맨드
-      next.md                  # /project:next 커맨드
-      review.md                # /project:review 커맨드
-      resume.md                # /project:resume 커맨드 (세션 복원)
-  scripts/
-    pre-commit-check.sh        # PreToolUse hook: 커밋 전 문서 동기화 + 메시지 형식 검증
-    emoji-check.sh             # PreToolUse hook: 이모지 사용 차단
-    doc-update-reminder.sh     # PostToolUse hook: 문서 업데이트 리마인더
-    check-docs-sync.sh         # Stop hook: 문서 동기화 + uncommitted changes 검증
-    approval-check.sh          # Stop hook: 사용자 승인 요청 여부 확인
-    context-refresh.sh         # UserPromptSubmit hook: 핵심 규칙 주기적 재주입
-    core-rules.txt             # 핵심 규칙 압축본 (context-refresh.sh용)
-  templates/
-    PROJECT.template.md        # 프로젝트 개요 문서 템플릿
-    PROGRESS.template.md       # 작업 현황 추적 문서 템플릿
-    MODULE-README.template.md  # 모듈별 README 템플릿
-    SPEC.template.md           # 기능 명세 템플릿
-  research/                    # 리서치 결과 저장 (기능별 모듈화)
-    01-claude-code-config/     # Claude Code 설정 관련 리서치
-    02-methodology/            # 방법론 관련 리서치
-    03-ai-tool-analysis/       # AI 도구 비교 분석
+cd src
+npx expo start
 ```
 
-## 핵심 철학
+Expo Go 앱에서 QR 코드를 스캔하여 실행합니다.
 
-1. **일 쪼개기**: 모든 업무를 단계별 분해, 순차 진행, 단계별 승인
-2. **문서화 필수**: 코드 변경 시 문서 동시 업데이트 (hooks로 강제)
-3. **모듈화**: 기능 단위 독립 모듈, 교차 의존 최소화
-4. **투명한 현황**: PROGRESS.md에 항상 현재 상태 반영
-5. **엄격한 네이밍**: 일관된 명명 규칙으로 누구나 구조 파악 가능
+## 프로젝트 구조
 
-## 주의사항
+```
+src/
+  core/           앱 진입점, 네비게이션
+  pages/          화면 (홈, 경로탐색, 출퇴근, 설정)
+  features/       비즈니스 기능 (경로검색, 출퇴근세션, 실시간정보, 환승안내)
+  entities/       도메인 모델 (경로, 정거장, 사용자)
+  widgets/        독립 UI 블록 (경로카드, 지도)
+  shared/         공통 유틸, API 클라이언트, 훅
+  services/       백그라운드 위치 추적, 알림
+```
 
-- `system-prompts-and-models-of-ai-tools-main/` 폴더는 레퍼런스 자료입니다. 새 프로젝트에는 복제하지 않아도 됩니다.
-- `research/` 폴더의 기존 리서치는 템플릿 설계를 위한 것입니다. 새 프로젝트의 리서치는 초기화 시 새로 수행됩니다.
-- hooks 스크립트(`scripts/`)는 bash 환경과 `jq`가 필요합니다. Windows에서는 Git Bash가 설치되어 있어야 합니다.
-- macOS에서는 `brew install jq`로 설치할 수 있습니다. Linux에서는 `apt install jq` 또는 `yum install jq`를 사용합니다.
+## 브랜치 전략
+
+| 브랜치 | 용도 |
+|--------|------|
+| `main` | 배포 (안정 버전) |
+| `develop` | 개발 (일상 작업) |
+
+## 라이선스
+
+MIT
